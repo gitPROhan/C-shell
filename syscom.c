@@ -1,6 +1,6 @@
 #include "headers.h"
 
-void syscom(char **instr, int l, char *process, int flag, int k, int j, char *prev_background_processes)
+void syscom(char **instr, int l, char *process, int flag, int k, int j, ll *bgp)
 {
     if (strcmp(instr[0], "pastevents") == 0)
         pastevents(instr, l);
@@ -35,14 +35,20 @@ void syscom(char **instr, int l, char *process, int flag, int k, int j, char *pr
         else
         {
             printf("%d\n", pid);
-            int status;
-            char back_proc[100];
-            waitpid(pid, &status, WNOHANG);
-            if (WIFEXITED(status))
-                snprintf(back_proc, 100, "%s exited normally (%d)\n", instr[0], pid);
-            else if (WIFSIGNALED(status))
-                snprintf(back_proc, 100, "%s exited abnormally (%d)\n", instr[0], pid);
-            strcat(prev_background_processes, back_proc);
+            ll newnode = (ll)malloc(sizeof(node));
+            newnode->name = (char *)malloc(sizeof(char) * 100);
+            strcpy(newnode->name, instr[0]);
+            newnode->pid = pid;
+            newnode->next = *bgp;
+            *bgp = newnode;
+            // int status;
+            // char back_proc[100];
+            // waitpid(pid, &status, WNOHANG);
+            // if (WIFEXITED(status))
+            //     snprintf(back_proc, 100, "%s exited normally (%d)\n", instr[0], pid);
+            // else if (WIFSIGNALED(status))
+            //     snprintf(back_proc, 100, "%s exited abnormally (%d)\n", instr[0], pid);
+            // strcat(prev_background_processes, back_proc);
         }
     }
 }

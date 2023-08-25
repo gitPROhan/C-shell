@@ -5,28 +5,53 @@ int main()
     char home[100];
     getcwd(home, 100);
     char process[100] = "\0";
-    char prev_background_processes[200] = "\0";
     char old_wd[100];
+    ll bgp = (ll)malloc(sizeof(node));
+    bgp->name = (char *)malloc(sizeof(char) * 100);
     while (1)
     {
-        // Print appropriate prompt with username, systemname and directory before accepting input
         prompt(home, process);
         process[0] = '\0';
         int flag = 0;
         char input[4096];
         fgets(input, 4096, stdin);
+        ll curr = bgp;
+        ll prev = NULL;
+        while (curr != NULL)
+        {
+            int status;
+            int val = waitpid(curr->pid, &status, WNOHANG);
+            if (val > 0)
+            {
+                printf("%s exited normally (%d)\n", curr->name, curr->pid);
+                if (prev == NULL)
+                {
+                    ll done = curr;
+                    curr = curr->next;
+                    free(done);
+                }
+                else
+                {
+                    ll done = curr;
+                    prev->next = curr->next;
+                    curr = curr->next;
+                    free(done);
+                }
+            }
+            else
+            {
+                prev = curr;
+                curr = curr->next;
+            }
+        }
         if (strncmp(input, "exit", 4) == 0)
         {
-            FILE *ptr;
-            ptr = fopen("history.txt", "a");
-            fprintf(ptr, "exit\n");
-            fclose(ptr);
+            char **arr = (char **)malloc(sizeof(char *)*5);
+            strcpy(arr[0], "exit");
+            pastevents(arr, 1);
             break;
         }
-        if (strlen(prev_background_processes) != 0)
-            printf("%s", prev_background_processes);
-        prev_background_processes[0] = '\0';
-        if (strncmp("warp", input, 4) == 0)
+        else if (strncmp("warp", input, 4) == 0)
         {
             char *token;
             char *instruc[100];
@@ -60,8 +85,20 @@ int main()
         else if (strncmp(input, "proclore", 8) == 0)
             proclore(input);
         else if (strncmp(input, "seek", 4) == 0)
-            seek(input);
+        {
+            char *token;
+            char *instruc[100];
+            int c = 0;
+            token = strtok(input, " \n");
+            while (token != NULL)
+            {
+                instruc[c++] = token;
+                token = strtok(NULL, " \n");
+            }
+            instruc[c] = NULL;
+            seek(instruc, c, home);
+        }
         else
-            tokenize(input, process, flag, prev_background_processes);
+            tokenize(input, process, flag, &bgp);
     }
 }

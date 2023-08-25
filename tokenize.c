@@ -1,6 +1,6 @@
 #include "headers.h"
 
-void tokenize(char *input, char *process, int flag, char *prev_background_processes)
+void tokenize(char *input, char *process, int flag, ll *bgp)
 {
     char *token;
     char *instruc[100];
@@ -39,7 +39,7 @@ void tokenize(char *input, char *process, int flag, char *prev_background_proces
                 token3 = strtok(NULL, " \n");
             }
             instr[l] = NULL;
-            syscom(instr, l, process, flag, k, j, prev_background_processes);
+            syscom(instr, l, process, flag, k, j, bgp);
         }
         i++;
     }

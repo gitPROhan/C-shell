@@ -29,4 +29,14 @@
 #include "syscom.h"
 #include "proclore.h"
 #include "seek.h"
+
+typedef struct node
+{
+    char *name;
+    int pid;
+    struct node *next;
+} node;
+
+typedef node *ll;
+
 #endif

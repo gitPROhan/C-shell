@@ -43,7 +43,7 @@ void peek(char **full_peek_instr, int c, char *old_wd, char *home)
     }
     else if (c == 3)
     {
-        if (strcmp(full_peek_instr[2], "-l") || strcmp(full_peek_instr[2], "-a"))
+        if (strcmp(full_peek_instr[2], "-l") == 0 || strcmp(full_peek_instr[2], "-a") == 0)
         {
             details = 1;
             hidden = 1;
@@ -51,19 +51,21 @@ void peek(char **full_peek_instr, int c, char *old_wd, char *home)
             getcwd(cwd, 100);
             strcpy(path, cwd);
         }
-        else if (strlen(full_peek_instr[1]) == 2)
-        {
-            if (full_peek_instr[1][1] == 'l')
-                details = 1;
-            else
-                hidden = 1;
-            strcpy(path, full_peek_instr[c - 1]);
-        }
-        else
+        else if (strcmp(full_peek_instr[1], "-al") == 0 || strcmp(full_peek_instr[1], "-la") == 0)
         {
             hidden = 1;
             details = 1;
-            strcpy(path, full_peek_instr[c - 1]);
+            strcpy(path, full_peek_instr[2]);
+        }
+        else if (strcmp(full_peek_instr[1], "-l") == 0)
+        {
+            details = 1;
+            strcpy(path, full_peek_instr[2]);
+        }
+        else if (strcmp(full_peek_instr[1], "-a") == 0)
+        {
+            hidden = 1;
+            strcpy(path, full_peek_instr[2]);
         }
     }
     else if (c == 2)
@@ -111,6 +113,7 @@ void peek(char **full_peek_instr, int c, char *old_wd, char *home)
         snprintf(new_path, 200, "%s%s", home, path + 1);
         strcpy(path, new_path);
     }
+
     DIR *dir = opendir(path);
     if (!dir)
     {
@@ -143,6 +146,15 @@ void peek(char **full_peek_instr, int c, char *old_wd, char *home)
     }
 
     qsort(file_instances, num_file_instances, sizeof(char *), comparator);
+
+    // if (details)
+    // {
+    //     struct stat dir_stat;
+    //     if (stat(path, &dir_stat) == -1)
+    //         perror("stat");
+    //     off_t total_block_size = dir_stat.st_blocks * 512;
+    //     printf("total %ld\n", total_block_size);
+    // }
 
     for (int i = 0; i < num_file_instances; i++)
     {

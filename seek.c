@@ -1,126 +1,118 @@
 #include "headers.h"
 
-void handle_single_result(const char *path, int flags)
+void find(int target_path_length, char *path, char *target, int file, int directory, int *c, char *execute_path)
 {
-    struct stat st;
-    if (stat(path, &st) == 0)
-    {
-        if ((flags & 0x01) && S_ISDIR(st.st_mode))
-        {
-            if (flags & 0x08)
-            {
-                if (access(path, X_OK) == 0)
-                {
-                    chdir(path);
-                    printf("Changed current directory to: %s\n", path);
-                }
-                else
-                {
-                    printf("Missing permissions for task!\n");
-                }
-            }
-            else
-            {
-                printf("%s/\n", path);
-            }
-        }
-        else if ((flags & 0x02) && S_ISREG(st.st_mode))
-        {
-            if (flags & 0x08)
-            {
-                FILE *file = fopen(path, "r");
-                if (file)
-                {
-                    char buffer[256];
-                    while (fgets(buffer, sizeof(buffer), file))
-                    {
-                        printf("%s", buffer);
-                    }
-                    fclose(file);
-                }
-                else
-                {
-                    printf("Missing permissions for task!\n");
-                }
-            }
-            else
-            {
-                printf("%s\n", path);
-            }
-        }
-    }
-}
-
-void seek(const char *args)
-{
-    int flags = 0;
-    const char *search = NULL;
-    const char *target_dir = NULL;
-
-    // Parse flags
-    if (args[0] == '-')
-    {
-        for (int i = 1; args[i] != ' ' && args[i] != '\0'; i++)
-        {
-            if (args[i] == 'd')
-            {
-                flags |= 0x01;
-            }
-            else if (args[i] == 'f')
-            {
-                flags |= 0x02;
-            }
-            else if (args[i] == 'e')
-            {
-                flags |= 0x08;
-            }
-            else
-            {
-                printf("Invalid flags!\n");
-                return;
-            }
-        }
-    }
-
-    // Parse search and target directory
-    char *arg_copy = strdup(args);
-    char *token = strtok(arg_copy, " ");
-    if (token)
-    {
-        search = token;
-        token = strtok(NULL, " ");
-        if (token)
-        {
-            target_dir = token;
-        }
-    }
-    free(arg_copy);
-
-    // Set target directory if not provided
-    if (!target_dir)
-    {
-        target_dir = ".";
-    }
-
-    // Open target directory
-    DIR *dir = opendir(target_dir);
-    if (!dir)
-    {
-        printf("No match found!\n");
+    DIR *dir = opendir(path);
+    if (dir == NULL)
         return;
-    }
-
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL)
     {
-        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 &&
-            strstr(entry->d_name, search) != NULL)
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+        char child_path[512];
+        snprintf(child_path, 600, "%s/%s", path, entry->d_name);
+        struct stat st;
+        if (stat(child_path, &st) == -1)
+            continue;
+        if (S_ISDIR(st.st_mode))
         {
-            char path[1024];
-            snprintf(path, sizeof(path), "%s/%s", target_dir, entry->d_name);
-            handle_single_result(path, flags);
+            if (strcmp(entry->d_name, target) == 0 && directory)
+            {
+                char found_path[100];
+                snprintf(found_path, 100, "%s", child_path + target_path_length);
+                printf(BLUE ".%s\n" RESET, found_path);
+                *c += 1;
+                strcpy(execute_path, child_path);
+            }
+            find(target_path_length, child_path, target, file, directory, c, execute_path);
+        }
+        else if (S_ISREG(st.st_mode) && file)
+        {
+            if (strncmp(entry->d_name, target, strlen(target)) == 0)
+            {
+                char found_path[100];
+                snprintf(found_path, 100, "%s", child_path + target_path_length);
+                printf(GREEN ".%s\n" RESET, found_path);
+                strcpy(execute_path, child_path);
+                *c += 1;
+            }
         }
     }
-
     closedir(dir);
+}
+
+void seek(char **instruc, int len, char *home)
+{
+    int file = 0;
+    int directory = 0;
+    int execute = 0;
+    int target_recieved = 0;
+    char target[100];
+    char path[200] = "\0";
+    for (int i = 1; i < len; i++)
+    {
+        int flag = 0;
+        if (strcmp(instruc[i], "-f") == 0)
+            file = 1;
+        else if (strcmp(instruc[i], "-d") == 0)
+            directory = 1;
+        else if (strcmp(instruc[i], "-e") == 0)
+            execute = 1;
+        else
+        {
+            if (target_recieved == 0)
+            {
+                target_recieved = 1;
+                strcpy(target, instruc[i]);
+            }
+            else
+                strcpy(path, instruc[i]);
+        }
+    }
+    if (strlen(path) == 0)
+        getcwd(path, 200);
+    if (file == 1 && directory == 1)
+    {
+        printf("Invalid flags!\n");
+        return;
+    }
+    if (!file && !directory)
+    {
+        file = 1;
+        directory = 1;
+    }
+    int c = 0;
+    char execute_path[200];
+    if (path)
+        find(strlen(path), path, target, file, directory, &c, execute_path);
+    if (c == 0)
+        printf("No match found!\n");
+    else if (c == 1 && execute == 1)
+    {
+        struct stat st;
+        if (stat(execute_path, &st) == -1)
+        {
+            printf("Missing permissions for task!\n");
+            return;
+        }
+        if (S_ISDIR(st.st_mode))
+            chdir(execute_path);
+        else if (S_ISREG(st.st_mode))
+        {
+            FILE *ptr;
+            ptr = fopen(execute_path, "r");
+            if (ptr == NULL)
+            {
+                printf("Missing permissions for task!\n");
+                return;
+            }
+            char str[100];
+            while (fgets(str, 100, ptr) != NULL)
+            {
+                printf("%s", str);
+            }
+            fclose(ptr);
+        }
+    }
 }
