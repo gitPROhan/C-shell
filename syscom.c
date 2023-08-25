@@ -1,10 +1,10 @@
 #include "headers.h"
 
-void syscom(char **instr, int l, char *process, int flag, int k, int j, ll *bgp)
+void syscom(char **instr, int l, char *process, ll *bgp, int flag)
 {
     if (strcmp(instr[0], "pastevents") == 0)
         pastevents(instr, l);
-    else if (k == j - 1 && flag == 0)
+    else if (flag == 1)
     {
         pastevents(instr, l);
         pid_t pid = fork();
@@ -41,14 +41,6 @@ void syscom(char **instr, int l, char *process, int flag, int k, int j, ll *bgp)
             newnode->pid = pid;
             newnode->next = *bgp;
             *bgp = newnode;
-            // int status;
-            // char back_proc[100];
-            // waitpid(pid, &status, WNOHANG);
-            // if (WIFEXITED(status))
-            //     snprintf(back_proc, 100, "%s exited normally (%d)\n", instr[0], pid);
-            // else if (WIFSIGNALED(status))
-            //     snprintf(back_proc, 100, "%s exited abnormally (%d)\n", instr[0], pid);
-            // strcat(prev_background_processes, back_proc);
         }
     }
 }

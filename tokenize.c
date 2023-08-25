@@ -1,46 +1,57 @@
 #include "headers.h"
 
-void tokenize(char *input, char *process, int flag, ll *bgp)
+void tokenize(char *input, char *process, ll *bgp)
 {
     char *token;
     char *instruc[100];
     int c = 0;
-    token = strtok(input, ";\n");
+    token = strtok(input, " \n");
     while (token != NULL)
     {
         instruc[c++] = token;
-        token = strtok(NULL, ";\n");
+        token = strtok(NULL, " \n");
     }
     instruc[c] = NULL;
-    if (instruc[c - 1][strlen(instruc[c - 1]) - 1] == '&')
-        flag = 1;
-    int i = 0;
-    while (i < c)
+    int arr_it = 0;
+    char **command = (char **)malloc(sizeof(char *) * 50);
+    for (int i = 0; i < 50; i++)
     {
-        char *individual_instruc[200];
-        char *token2;
-        int j = 0;
-        token2 = strtok(instruc[i], "&\n");
-        while (token2 != NULL)
+        command[i] = (char *)malloc(sizeof(char) * 20);
+    }
+    int cmd_it = 0;
+    while (arr_it < c)
+    {
+        if (strcmp(instruc[arr_it], "&") == 0)
         {
-            individual_instruc[j++] = token2;
-            token2 = strtok(NULL, "&\n");
+            command[cmd_it] = NULL;
+            syscom(command, cmd_it, process, bgp, 0);
+            command[cmd_it] = (char *)malloc(sizeof(char) * 20);
+            cmd_it = 0;
         }
-        individual_instruc[j] = NULL;
-        for (int k = 0; k < j; k++)
+        else if (strcmp(instruc[arr_it], ";") == 0)
         {
-            char *instr[200];
-            char *token3;
-            int l = 0;
-            token3 = strtok(individual_instruc[k], " \n");
-            while (token3 != NULL)
+            command[cmd_it] = NULL;
+            syscom(command, cmd_it, process, bgp, 1);
+            command[cmd_it] = (char *)malloc(sizeof(char) * 20);
+            cmd_it = 0;
+        }
+        else
+        {
+            if (arr_it == c - 1)
             {
-                instr[l++] = token3;
-                token3 = strtok(NULL, " \n");
+                strcpy(command[cmd_it], instruc[arr_it]);
+                cmd_it++;
+                command[cmd_it] = NULL;
+                syscom(command, cmd_it, process, bgp, 1);
+                command[cmd_it] = (char *)malloc(sizeof(char) * 20);
+                cmd_it = 0;
             }
-            instr[l] = NULL;
-            syscom(instr, l, process, flag, k, j, bgp);
+            else
+            {
+                strcpy(command[cmd_it], instruc[arr_it]);
+                cmd_it++;
+            }
         }
-        i++;
+        arr_it++;
     }
 }

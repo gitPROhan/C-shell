@@ -147,14 +147,14 @@ void peek(char **full_peek_instr, int c, char *old_wd, char *home)
 
     qsort(file_instances, num_file_instances, sizeof(char *), comparator);
 
-    // if (details)
-    // {
-    //     struct stat dir_stat;
-    //     if (stat(path, &dir_stat) == -1)
-    //         perror("stat");
-    //     off_t total_block_size = dir_stat.st_blocks * 512;
-    //     printf("total %ld\n", total_block_size);
-    // }
+    if (details)
+    {
+        struct stat dir_stat;
+        if (stat(path, &dir_stat) == -1)
+            perror("stat");
+        off_t total_block_size = dir_stat.st_blocks * 512;
+        printf("total %ld\n", total_block_size);
+    }
 
     for (int i = 0; i < num_file_instances; i++)
     {

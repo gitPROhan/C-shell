@@ -103,6 +103,6 @@ int main()
             seek(instruc, c, home);
         }
         else
-            tokenize(input, process, 0, &bgp);
+            tokenize(input, process, &bgp);
     }
 }
