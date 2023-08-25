@@ -1,12 +1,12 @@
 #include "headers.h"
 
-void syscom(char **instr, int l, char *process, ll *bgp, int flag)
+void syscom(char **instr, int l, char *process, ll *bgp, int flag, char *home)
 {
     if (strcmp(instr[0], "pastevents") == 0)
-        pastevents(instr, l);
+        pastevents(instr, l, home, bgp);
     else if (flag == 1)
     {
-        pastevents(instr, l);
+        pastevents(instr, l, home, bgp);
         pid_t pid = fork();
         if (pid == 0)
             execvp(instr[0], instr);
@@ -28,7 +28,7 @@ void syscom(char **instr, int l, char *process, ll *bgp, int flag)
     }
     else
     {
-        pastevents(instr, l);
+        pastevents(instr, l, home, bgp);
         pid_t pid = fork();
         if (pid == 0)
             execvp(instr[0], instr);

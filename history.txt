@@ -1,0 +1,15 @@
+sleep 5 
+sleep 1 
+ls 
+sleep 5 
+sleep 1 
+ls 
+proclore 
+seek -e -f seek.c 
+peek -al .. 
+warp .. 
+warp ~ 
+seek README ~ 
+seek -e README ~ 
+clear 
+exit 

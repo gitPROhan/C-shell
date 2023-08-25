@@ -1,6 +1,6 @@
 #include "headers.h"
 
-void tokenize(char *input, char *process, ll *bgp)
+void tokenize(char *input, char *process, ll *bgp, char *home)
 {
     char *token;
     char *instruc[100];
@@ -24,14 +24,14 @@ void tokenize(char *input, char *process, ll *bgp)
         if (strcmp(instruc[arr_it], "&") == 0)
         {
             command[cmd_it] = NULL;
-            syscom(command, cmd_it, process, bgp, 0);
+            syscom(command, cmd_it, process, bgp, 0, home);
             command[cmd_it] = (char *)malloc(sizeof(char) * 20);
             cmd_it = 0;
         }
         else if (strcmp(instruc[arr_it], ";") == 0)
         {
             command[cmd_it] = NULL;
-            syscom(command, cmd_it, process, bgp, 1);
+            syscom(command, cmd_it, process, bgp, 1, home);
             command[cmd_it] = (char *)malloc(sizeof(char) * 20);
             cmd_it = 0;
         }
@@ -42,7 +42,7 @@ void tokenize(char *input, char *process, ll *bgp)
                 strcpy(command[cmd_it], instruc[arr_it]);
                 cmd_it++;
                 command[cmd_it] = NULL;
-                syscom(command, cmd_it, process, bgp, 1);
+                syscom(command, cmd_it, process, bgp, 1, home);
                 command[cmd_it] = (char *)malloc(sizeof(char) * 20);
                 cmd_it = 0;
             }

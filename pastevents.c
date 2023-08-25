@@ -1,20 +1,22 @@
 #include "headers.h"
 
-void pastevents(char **instr, int l)
+void pastevents(char **instr, int l, char *home, ll *bgp)
 {
+    char path_of_history[100];
+    snprintf(path_of_history, 100, "%s/history.txt", home);
     if (strcmp(instr[0], "pastevents") == 0)
     {
         if (l > 1 && strcmp(instr[1], "purge") == 0)
         {
             FILE *ptr;
-            ptr = fopen("history.txt", "w");
+            ptr = fopen(path_of_history, "w");
             fclose(ptr);
         }
         else if (l > 2 && strcmp(instr[1], "execute") == 0)
         {
             int line_number = atoi(instr[2]);
             FILE *ptr;
-            ptr = fopen("history.txt", "r");
+            ptr = fopen(path_of_history, "r");
             char buff[100];
             int x = 0;
             while (fgets(buff, 100, ptr) != NULL)
@@ -22,8 +24,13 @@ void pastevents(char **instr, int l)
                 x++;
             }
             fclose(ptr);
+            if (line_number > x)
+            {
+                printf("Invalid line number!\n");
+                return;
+            }
             line_number = x + 1 - line_number;
-            ptr = fopen("history.txt", "r");
+            ptr = fopen(path_of_history, "r");
             char str[100];
             int c = 1;
             while (c != line_number + 1 && fgets(str, 100, ptr) != NULL)
@@ -31,14 +38,12 @@ void pastevents(char **instr, int l)
                 c++;
             }
             fclose(ptr);
-            tokenize(str, NULL, 0, NULL);
-            ptr = fopen("history.txt", "a");
-            fclose(ptr);
+            tokenize(str, NULL, bgp, home);
         }
         else
         {
             FILE *ptr;
-            ptr = fopen("history.txt", "r");
+            ptr = fopen(path_of_history, "r");
             char str[100];
             while (fgets(str, 100, ptr) != NULL)
             {
@@ -64,7 +69,7 @@ void pastevents(char **instr, int l)
             events[i] = (char *)malloc(sizeof(char) * 100);
         }
         FILE *ptr;
-        ptr = fopen("history.txt", "r");
+        ptr = fopen(path_of_history, "r");
         char str[100];
         int c = 0;
         while (fgets(str, 100, ptr) != NULL)
@@ -76,10 +81,10 @@ void pastevents(char **instr, int l)
         {
             if (c >= 15)
             {
-                ptr = fopen("history.txt", "w");
+                ptr = fopen(path_of_history, "w");
                 fclose(ptr);
                 strcpy(events[c], next_command);
-                ptr = fopen("history.txt", "w");
+                ptr = fopen(path_of_history, "w");
                 for (int i = 1; i <= c; i++)
                 {
                     fprintf(ptr, "%s", events[i]);
@@ -88,7 +93,7 @@ void pastevents(char **instr, int l)
             }
             else
             {
-                ptr = fopen("history.txt", "a");
+                ptr = fopen(path_of_history, "a");
                 fprintf(ptr, "%s", next_command);
                 fclose(ptr);
             }
