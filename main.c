@@ -53,35 +53,6 @@ int main()
             else
                 break;
         }
-        // ll curr = bgp;
-        // ll prev = NULL;
-        // while (curr != NULL)
-        // {
-        //     int status;
-        //     int val = waitpid(curr->pid, &status, WNOHANG);
-        //     if (val > 0)
-        //     {
-        //         printf("%s exited normally (%d)\n", curr->name, curr->pid);
-        //         if (prev == NULL)
-        //         {
-        //             ll done = curr;
-        //             curr = curr->next;
-        //             free(done);
-        //         }
-        //         else
-        //         {
-        //             ll done = curr;
-        //             prev->next = curr->next;
-        //             curr = curr->next;
-        //             free(done);
-        //         }
-        //     }
-        //     else
-        //     {
-        //         prev = curr;
-        //         curr = curr->next;
-        //     }
-        // }
         if (strcmp(input, "\n") == 0)
             continue;
         int ns = 0;

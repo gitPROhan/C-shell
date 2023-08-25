@@ -31,7 +31,11 @@ void syscom(char **instr, int l, char *process, ll *bgp, int flag, char *home)
         pastevents(instr, l, home, bgp);
         pid_t pid = fork();
         if (pid == 0)
-            execvp(instr[0], instr);
+        {
+            int ret = execvp(instr[0], instr);
+            if (ret == -1)
+                printf("%s exited abnormally.\n", instr[0]);
+        }
         else
         {
             printf("%d\n", pid);
