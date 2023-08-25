@@ -14,35 +14,74 @@ int main()
         process[0] = '\0';
         char input[4096];
         fgets(input, 4096, stdin);
-        ll curr = bgp;
-        ll prev = NULL;
-        while (curr != NULL)
+        int status;
+        while (1)
         {
-            int status;
-            int val = waitpid(curr->pid, &status, WNOHANG);
-            if (val > 0)
+            int pid = waitpid(-1, &status, WNOHANG);
+            char name[100];
+            if (pid > 0)
             {
-                printf("%s exited normally (%d)\n", curr->name, curr->pid);
-                if (prev == NULL)
+                ll curr = bgp;
+                ll prev = NULL;
+                while (curr != NULL)
                 {
-                    ll done = curr;
-                    curr = curr->next;
-                    free(done);
+                    if (curr->pid == pid)
+                    {
+                        strcpy(name, curr->name);
+                        if (prev != NULL)
+                        {
+                            prev->next = curr->next;
+                            ll delete = curr;
+                            free(delete);
+                        }
+                        else
+                        {
+                            ll delete = curr;
+                            bgp = curr->next;
+                            free(delete);
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        curr = curr->next;
+                        prev = curr;
+                    }
                 }
-                else
-                {
-                    ll done = curr;
-                    prev->next = curr->next;
-                    curr = curr->next;
-                    free(done);
-                }
+                printf("%s exited normally (%d)\n", name, pid);
             }
             else
-            {
-                prev = curr;
-                curr = curr->next;
-            }
+                break;
         }
+        // ll curr = bgp;
+        // ll prev = NULL;
+        // while (curr != NULL)
+        // {
+        //     int status;
+        //     int val = waitpid(curr->pid, &status, WNOHANG);
+        //     if (val > 0)
+        //     {
+        //         printf("%s exited normally (%d)\n", curr->name, curr->pid);
+        //         if (prev == NULL)
+        //         {
+        //             ll done = curr;
+        //             curr = curr->next;
+        //             free(done);
+        //         }
+        //         else
+        //         {
+        //             ll done = curr;
+        //             prev->next = curr->next;
+        //             curr = curr->next;
+        //             free(done);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         prev = curr;
+        //         curr = curr->next;
+        //     }
+        // }
         if (strcmp(input, "\n") == 0)
             continue;
         int ns = 0;
