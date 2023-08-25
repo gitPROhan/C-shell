@@ -149,11 +149,20 @@ void peek(char **full_peek_instr, int c, char *old_wd, char *home)
 
     if (details)
     {
-        struct stat dir_stat;
-        if (stat(path, &dir_stat) == -1)
-            perror("stat");
-        off_t total_block_size = dir_stat.st_blocks * 512;
-        printf("total %ld\n", total_block_size);
+        int total = 0;
+        for (int i = 0; i < num_file_instances; i++)
+        {
+            char entry_path[600];
+            snprintf(entry_path, sizeof(entry_path), "%s/%s", path, file_instances[i]);
+            struct stat stat_info;
+            if (lstat(entry_path, &stat_info) == -1)
+            {
+                perror("lstat");
+                continue;
+            }
+            total += stat_info.st_blocks;
+        }
+        printf("total %d\n", total / 2);
     }
 
     for (int i = 0; i < num_file_instances; i++)
