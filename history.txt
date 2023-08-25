@@ -1,0 +1,15 @@
+ls -l 
+clear 
+ls 
+ls -l 
+echo 1 
+echo 2 
+echo 1 
+echo 2 
+echo 1 
+echo 2 
+ls 
+ls -l 
+echo 1 
+echo 2 
+exit 

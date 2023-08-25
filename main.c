@@ -12,7 +12,6 @@ int main()
     {
         prompt(home, process);
         process[0] = '\0';
-        int flag = 0;
         char input[4096];
         fgets(input, 4096, stdin);
         ll curr = bgp;
@@ -44,14 +43,19 @@ int main()
                 curr = curr->next;
             }
         }
-        if (strncmp(input, "exit", 4) == 0)
+        if (strcmp(input, "\n") == 0)
+            continue;
+        int ns = 0;
+        while (input[ns] == ' ')
+            ns++;
+        if (strncmp("exit", input + ns, 4) == 0)
         {
-            char **arr = (char **)malloc(sizeof(char *)*5);
+            char **arr = (char **)malloc(sizeof(char *) * 5);
             strcpy(arr[0], "exit");
             pastevents(arr, 1);
             break;
         }
-        else if (strncmp("warp", input, 4) == 0)
+        else if (strncmp("warp", input + ns, 4) == 0)
         {
             char *token;
             char *instruc[100];
@@ -68,7 +72,7 @@ int main()
                 warp(instruc[i], home, old_wd);
             }
         }
-        else if (strncmp("peek", input, 4) == 0)
+        else if (strncmp("peek", input + ns, 4) == 0)
         {
             char *token;
             char *full_peek_instr[5];
@@ -82,9 +86,9 @@ int main()
             full_peek_instr[c] = NULL;
             peek(full_peek_instr, c, old_wd, home);
         }
-        else if (strncmp(input, "proclore", 8) == 0)
+        else if (strncmp("proclore", input + ns, 8) == 0)
             proclore(input);
-        else if (strncmp(input, "seek", 4) == 0)
+        else if (strncmp("seek", input + ns, 4) == 0)
         {
             char *token;
             char *instruc[100];
@@ -99,6 +103,6 @@ int main()
             seek(instruc, c, home);
         }
         else
-            tokenize(input, process, flag, &bgp);
+            tokenize(input, process, 0, &bgp);
     }
 }

@@ -84,8 +84,13 @@ void seek(char **instruc, int len, char *home)
     }
     int c = 0;
     char execute_path[200];
-    if (path)
-        find(strlen(path), path, target, file, directory, &c, execute_path);
+    if (path[0] == '~')
+    {
+        char new_path[200];
+        snprintf(new_path, 200, "%s%s", home, path + 1);
+        strcpy(path, new_path);
+    }
+    find(strlen(path), path, target, file, directory, &c, execute_path);
     if (c == 0)
         printf("No match found!\n");
     else if (c == 1 && execute == 1)
